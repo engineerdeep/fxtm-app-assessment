@@ -2,35 +2,7 @@
 
 ## Overview
 
-Welcome to the **FXTM Forex Tracker App** assessment project. This Flutter application serves as a starting point for you to demonstrate your skills in Flutter development, API integration, real-time data handling, and implementing responsive UI designs that align with standard forex platforms.
-
----
-
-## Project Description
-
 The FXTM Forex Tracker App is designed to display real-time forex prices for selected currency pairs. When a user taps on a currency pair, they are navigated to a detail page showing historical price data with an interactive graph.
-
-**Features to Implement:**
-
-- **Real-Time Data Streaming:** Integrate with the Finnhub API to fetch and display live forex prices.
-- **Historical Data and Graphs:** Fetch historical price data and display it using interactive charts.
-- **Data Caching and State Management:** Optimize app performance by implementing efficient state management and caching strategies.
-- **Error Handling:** Gracefully handle API connectivity issues and provide user feedback.
-- **Responsive UI Design:** Ensure the app's UI is responsive and matches the design conventions of standard forex trading platforms.
-
----
-
-## Screens to Implement
-
-1. **Markets Screen (Price Tracker):**
-   - Displays a list of currency pairs with real-time price updates.
-   - Shows currency symbols, current prices, price changes, and percentage changes.
-   - Uses up/down arrows to indicate price movement (green for up, red for down).
-
-2. **History Screen (Trade History):**
-   - Shows historical price data for a selected currency pair.
-   - Includes an interactive graph displaying price trends over time.
-   - Provides detailed trading information and statistics.
 
 ---
 
@@ -46,7 +18,7 @@ The FXTM Forex Tracker App is designed to display real-time forex prices for sel
 1. **Clone the Repository**
 
    ```bash
-   git clone https://gitlab.com/exinity-hiring/fxtm-trader-launchpad.git
+   git clone https://github.com/engineerdeep/fxtm-app-assessment.git
    ```
 
 2. **Navigate to the Project Directory**
@@ -61,7 +33,13 @@ The FXTM Forex Tracker App is designed to display real-time forex prices for sel
    flutter pub get
    ```
 
-4. **Add Finnhub API Key**
+4. **Create a `.env` file in the root directory with the following content:**
+
+   ```
+   FINNHUB_API_KEY=your_api_key_here
+   FINNHUB_BASE_URL=https://finnhub.io/api/v1
+   FINNHUB_WS_URL=wss://ws.finnhub.io
+   ```
 
 5. **Run the App**
 
@@ -83,209 +61,145 @@ The FXTM Forex Tracker App is designed to display real-time forex prices for sel
      flutter run -d chrome
      ```
 
+6. **Test the App**
+
+   ```bash
+   cd packages/finnhub_api
+   flutter test
+   ```
+
+   ```bash
+   cd packages/forex_repository
+   flutter test
+   ```
+
 ---
 
 ## Project Structure
 
 ```
-lib/
-├── main.dart
-├── models/
-│   └── forex_pair.dart
-├── pages/
-│   ├── main_page.dart
-│   └── history_page.dart
-├── repositories/
-│   └── forex_repository.dart
-└── services/
-    └── finnhub_service.dart
+├── lib
+│   ├── core
+│   │   └── config
+│   ├── forex_pairs
+│   │   ├── bloc
+│   │   ├── view
+│   │   └── widgets
+│   ├── historical_data
+│   │   ├── bloc
+│   │   └── view
+│   └── pages
+├── packages
+│   ├── finnhub_api
+│   │   ├── lib
+│   │   │   └── src
+│   │   │       ├── config
+│   │   │       ├── enums
+│   │   │       ├── models
+│   │   │       └── services
+│   │   └── test
+│   └── forex_repository
+│       ├── lib
+│       │   └── src
+│       └── test
+
 ```
 
-- **models/**: Data models representing the structure of forex data.
-- **services/**: Classes responsible for making API calls to Finnhub.
-- **repositories/**: Abstraction layer between services and UI components.
-- **pages/**: UI screens of the application.
+**The application is separated into three layers:**
+
+- Presentation Layer
+- Business Logic Layer
+- Data Layer
+  - Repository
+  - Data Provider
+
+The app consists of isolated features in it's own directories. This approach makes the app scalable as it allows you to work on a feature in isolation and multiple developers can work on different features simultaneously.
+
+This project consists of two features
+
+- Forex Pairs
+- Historical Data
+
+Each feature will consist of it's own
+
+- bloc/cubit folder: contains the business logic and state related to the respective feature
+- view folder: contains the main pages that make the feature
+- widgets: reusable widgets used for this feature
+
+#### Presentation Layer
+
+The presentation layer is located in the **view** folder of a feature, this will be the user facing UI.
+
+#### Business Logic Layer
+
+The business logic layer (related to the respective feature) is colocated within the feature itself along with the view.
+
+#### Data Layer
+
+The Data Layer consists of two parts
+
+- Repository
+- Data Provider
+
+The Data Provider is the furthest from the user. The data providers responsibility is to fetch and provide raw data from asynchronous data sources using network requests.
+
+The Repository is an intermediate layer between the Business logic layer and the data provider and is responsible to collate the data from one or more data providers and pass it to the business logic layer.
 
 ---
 
-## Tasks to Complete
+### Finnhub Api
 
-### 1. Implement Real-Time Price Updates
+Finnhub api provides realtime RESTful api's and WebSockets to get stock data.
 
-- **Objective:**
-   - Replace the mock data in `finnhub_service.dart` with actual API calls to the Finnhub API.
-   - Fetch real-time forex prices and ensure they update smoothly in the UI.
+Since this is a 3rd party data provider, We've leveraged Dart Packages as they're easy to maintain, extend, and test. The dart package can also then be reused across other dart projects as a mini library.
 
-### 2. Fetch and Display Historical Data with Graphs
+### Forex Repository
 
-- **Objective:**
-   - Implement the `HistoryPage` to display historical price data for a selected currency pair using an interactive chart.
-
-- **Instructions:**
-   - **API Endpoint:** Use the Finnhub API endpoint for forex candles.
-      - [Forex Candles Endpoint Documentation](https://finnhub.io/docs/api/forex-candles)
-   - **Implementation Steps:**
-      - Update the `fetchHistoricalData` method in `finnhub_service.dart`.
-      - Parse the historical data and prepare it for charting.
-      - Use a charting library to display the data.
-         - Recommended packages:
-            - `charts_flutter`
-            - `fl_chart`
-      - Update `history_page.dart` to include the chart and relevant trading information.
-   - **Considerations:**
-      - Handle different timeframes (e.g., daily, hourly).
-      - Provide options for users to select the timeframe.
-
-### 3. Implement Data Caching and State Management
-
-- **Objective:**
-   - Optimize the app's performance by caching data and managing state efficiently.
-
-- **Instructions:**
-   - **State Management:**
-      - Choose a state management solution:
-         - `Provider`
-         - `Bloc`
-         - `Riverpod`
-         - `GetX`
-      - Implement it across the app to manage data and UI state.
-   - **Data Caching:**
-      - Cache frequently accessed data to reduce API calls.
-      - Consider using packages like `hive` or `shared_preferences` for local storage.
-   - **Implementation Steps:**
-      - Implement caching in the repository layer.
-      - Ensure that cached data is invalidated or refreshed appropriately.
-   - **Considerations:**
-      - Balance between up-to-date data and performance.
-      - Handle cache expiration policies.
-
-### 4. Handle API Errors Gracefully
-
-- **Objective:**
-   - Ensure the app provides a smooth user experience even when API errors or connectivity issues occur.
-
-### 5. Enhance UI and Responsiveness
-
-- **Objective:**
-   - Improve the UI styling to match professional forex trading platforms.
-   - Ensure the app is responsive across various devices and screen sizes.
----
-
-## Notes
-
-- **API Key Management:**
-   - Do not hardcode your API key in the code.
-   - Use environment variables or secure storage to manage your API key.
-
-- **Mock Data:**
-   - The app currently uses mock data with simulated price changes.
-   - Your task is to replace this with real data from the Finnhub API.
-
-- **UI Design:**
-   - The app displays currency pairs with up/down arrows indicating price movement, similar to standard forex platforms.
-   - Enhance the UI to closely match the look and feel of professional forex trading apps.
-
-- **Real-Time Data Streaming:**
-   - If using WebSockets, handle the connection lifecycle properly.
-   - Ensure the app remains responsive during data updates.
-
-- **Testing:**
-   - Write comprehensive test cases to validate user interactions and data handling.
-   - Cover edge cases, such as API failures and varying network conditions.
+Forex repository is also a reusable Dart package. The repository acts as the data provider for the UI and by doing so, completely isolates the data source from the frontend. This allows us to swap the Finnhub Api with any other data source without touching the repository or the app.
 
 ---
 
-## Evaluation Criteria
+### Features Implemented
 
-Your submission will be evaluated based on the following criteria:
-
-### **Code Quality**
-
-- **Clarity and Organization:**
-   - Code is well-organized, with a clear structure and meaningful naming conventions.
-- **Best Practices:**
-   - Adherence to Flutter and Dart best practices.
-   - Clean architecture and separation of concerns.
-- **Functionality:**
-   - Correct implementation of the required features.
-   - Efficient and effective use of Flutter widgets and tools.
-
-### **Testing**
-
-- **Comprehensiveness:**
-   - Adequate test coverage for both UI interactions and data handling.
-- **Quality:**
-   - Tests are reliable, well-written, and validate key functionality.
-- **Edge Cases:**
-   - Consideration of various scenarios, including error conditions and unusual user behaviors.
-
-### **Documentation**
-
-- **README File:**
-   - Clear setup instructions and project overview.
-   - Explanation of architecture and design decisions.
-- **Code Documentation:**
-   - Comments explaining complex logic or important sections.
-   - Documentation of key components and state management practices.
-
-### **User Experience**
-
-- **UI/UX Design:**
-   - Professional and intuitive user interface.
-   - Responsive design across different devices and orientations.
-- **Performance:**
-   - Smooth animations and transitions.
-   - Efficient data handling without unnecessary delays.
+- Finnhub Api package
+  - Used to consume finnhub restful api and websocket for live forex data.
+- Forex Repository package
+  - Used to interface between the Finnhub api package and Business logic layer.
+- Forex Pairs Screen
+  - Implemented websocket connection to fetch live data from the Finnhub api.
+- Historical Data
+  - Implemented chart to showcase historical data for a forex pair.
 
 ---
 
-## Submission Instructions
+### State Management And Caching
 
-1. **Ensure the App Runs Successfully**
+The state management solution used for the app is BloC library and caching solution used is Hydrated Bloc.
+All of the UI state is managed by BloC which gracefully updates the stateless widgets consuming the bloc.
+In case of connection issues, the cached data will take over and populate the screen making the app offline ready.
 
-   - Test the app thoroughly on at least one platform (Android, iOS, or Web).
-   - Ensure there are no runtime errors or crashes.
+### Enhanced UI and Responsiveness
 
-2. **Prepare the Codebase**
+The app is designed as per current forex platforms and can be run on mobile devices (android and iOS), tablet and desktop.
 
-3. **Update Documentation**
+### Testing
 
-   - Include any additional notes or explanations in the `README.md` file.
-   - Document any assumptions or decisions you made during development.
+The app consists of unit tests for the data layer, which includes the finnhub api package and the forex repository.
 
-4. **Package the Project**
+### Notes
 
-   - Zip the entire project directory, excluding build and cache files.
-   - Include the `pubspec.lock` file to ensure dependency versions are preserved.
-
-5. **Submit Your Work**
-
----
-
-## Additional Resources
-
-- **Flutter Documentation:** [https://flutter.dev/docs](https://flutter.dev/docs)
-- **Dart Documentation:** [https://dart.dev/guides](https://dart.dev/guides)
-- **Finnhub API Documentation:** [https://finnhub.io/docs/api](https://finnhub.io/docs/api)
-- **State Management in Flutter:**
-   - [Provider Package](https://pub.dev/packages/provider)
-   - [Bloc Library](https://bloclibrary.dev/#/)
-   - [Riverpod Package](https://riverpod.dev/)
-- **Charting Libraries:**
-   - [charts_flutter](https://pub.dev/packages/charts_flutter)
-   - [fl_chart](https://pub.dev/packages/fl_chart)
-- **Connectivity Detection:**
-   - [connectivity_plus](https://pub.dev/packages/connectivity_plus)
+- To simulate the change in forex prices, I've added a minor variation **on top of** the prices returned via the WebSocket as when the stock market is closed the data returned is same.
+- The websocket connection currently does not allow to subscribe to alot of pairs, hence I've limited the subscription to only first 20 pairs.
+- The websocket has a retry mechanism upto 5 times with a delay between each retry (2 seconds).
+- The app avoids subscribing to the same pair if already subscribed.
+- The app unsubscribes to the subscribed symbols before disconnecting.
+- The candle api to be used is a _premium_ api and hence the response is hardcoded in the app. The implementation is done in a way to allow swapping the hardcoded data with the real api and it'll work right off the bat.
 
 ---
 
-## Contact Information
+### Scope for improvement
 
-If you have any questions or need clarification, please reach out to:
-
-- **Contact Person:** [Your Name]
-- **Email:** [your.email@example.com]
-
----
-
-**Good luck, and we look forward to seeing your implementation!**
+- Due to the dependency on a third party data provider (finnhub), when a WebSocket connection is established, the app just waits until the data arrives and this can take upto 30 seconds sometimes. For now, the app shows a loading indicator (shimmer) when the data has not arrived for a better user experience. Once the data arrives, it's automatically cached and the subsequent experience is much smoother as the data gets fetched directly from cache until it actually arrives. An improvement here would be to fetch an initial price list (an http request), populate the initial data with that while the data arrives via the websocket connection.
+- Implementing a unified app theme, ideally as a separate dart package, that would contain the font sizes, border radius, spacing, light mode, dark mode etc. Having it as a separate dart package would leverage having a consistent design system across all projects.
+- Currently the project contains minimal test coverage.
+- An extended view of the chart in landscape mode in mobile devices.
