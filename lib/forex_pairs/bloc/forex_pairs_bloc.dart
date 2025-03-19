@@ -122,10 +122,13 @@ class ForexPairsBloc extends HydratedBloc<ForexPairsEvent, ForexPairsState> {
   void _onQuoteReceived(
       ForexPairsQuoteReceived event, Emitter<ForexPairsState> emit) {
     final quotes = Map<String, ForexQuote>.from(state.quotes);
-    final previousQuotes = Map<String, ForexQuote>.from(state.quotes);
+    final previousQuotes = Map<String, ForexQuote>.from(state.previousQuotes);
 
     if (quotes.containsKey(event.quote.symbol)) {
-      previousQuotes[event.quote.symbol] = quotes[event.quote.symbol]!;
+      final previousQuote = quotes[event.quote.symbol];
+      if (previousQuote != null) {
+        previousQuotes[event.quote.symbol] = previousQuote;
+      }
     }
 
     quotes[event.quote.symbol] = event.quote;

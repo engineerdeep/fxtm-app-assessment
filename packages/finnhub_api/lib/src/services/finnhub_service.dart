@@ -16,18 +16,18 @@ class FinnhubService {
   final http.Client _httpClient;
 
   final _quoteController = StreamController<ForexQuote>.broadcast();
+  final _connectionStateController =
+      StreamController<WebSocketConnectionState>.broadcast();
   final Set<String> _subscribedSymbols = {};
 
   WebSocketChannel? _channel;
-
-  final _connectionStateController =
-      StreamController<WebSocketConnectionState>.broadcast();
   Timer? _reconnectionTimer;
-  static const _reconnectDelay = Duration(seconds: 2);
-  static const _maxReconnectAttempts = 5;
   int _reconnectAttempts = 0;
   WebSocketConnectionState _connectionState =
       WebSocketConnectionState.disconnected;
+
+  static const _reconnectDelay = Duration(seconds: 2);
+  static const _maxReconnectAttempts = 5;
 
   FinnhubService({required config, http.Client? httpClient})
     : _config = config,
@@ -49,7 +49,7 @@ class FinnhubService {
       final websocketUrl = '${_config.wsUrl}?token=${_config.apiKey}';
       _channel = WebSocketChannel.connect(Uri.parse(websocketUrl));
 
-      _channel!.stream.listen(
+      _channel?.stream.listen(
         (message) {
           final data = jsonDecode(message);
           if (data['type'] == 'trade') {
@@ -253,8 +253,8 @@ class FinnhubService {
   void dispose() {
     _reconnectionTimer?.cancel();
     _connectionStateController.close();
-    disconnect();
     _quoteController.close();
+    disconnect();
   }
 
   void _updateConnectionState(WebSocketConnectionState state) {
